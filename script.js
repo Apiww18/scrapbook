@@ -1,3 +1,6 @@
+/* =====================
+   VARIABEL UTAMA
+===================== */
 const pages = document.querySelectorAll('.page');
 const music = document.getElementById('music');
 
@@ -9,8 +12,12 @@ let typingInterval = null;
    TYPEWRITER EFFECT
 ===================== */
 function typeEffect(el) {
+    if (!el) return;
+
+    // hentikan typing sebelumnya
     if (typingInterval) clearInterval(typingInterval);
 
+    // simpan teks asli
     const text = el.dataset.text || el.innerText;
     el.dataset.text = text;
     el.innerText = '';
@@ -19,12 +26,15 @@ function typeEffect(el) {
     typingInterval = setInterval(() => {
         el.innerText += text[i];
         i++;
-        if (i >= text.length) clearInterval(typingInterval);
+        if (i >= text.length) {
+            clearInterval(typingInterval);
+            typingInterval = null;
+        }
     }, 45);
 }
 
 /* =====================
-   SHOW PAGE
+   TAMPILKAN HALAMAN
 ===================== */
 function showPage(i) {
     if (i < 0 || i >= pages.length) return;
@@ -33,10 +43,10 @@ function showPage(i) {
     pages[i].classList.add('active');
 
     const text = pages[i].querySelector('.type');
-    if (text) typeEffect(text);
+    typeEffect(text);
 
-    // play music after first interaction
-    if (!started) {
+    // jalankan musik setelah interaksi pertama
+    if (!started && music) {
         music.volume = 0.4;
         music.play().catch(() => {});
         started = true;
@@ -44,7 +54,7 @@ function showPage(i) {
 }
 
 /* =====================
-   NEXT BUTTON (PC)
+   TOMBOL NEXT (PC)
 ===================== */
 document.querySelectorAll('.next').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -56,7 +66,7 @@ document.querySelectorAll('.next').forEach(btn => {
 });
 
 /* =====================
-   UNLOCK SECRET
+   TOMBOL UNLOCK (HALAMAN RAHASIA)
 ===================== */
 const unlockBtn = document.querySelector('.unlock');
 if (unlockBtn) {
@@ -69,23 +79,33 @@ if (unlockBtn) {
 }
 
 /* =====================
-   AUTO SWIPE (HP)
+   SWIPE OTOMATIS (HP)
 ===================== */
 let startX = 0;
 
 document.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX;
-});
+}, { passive: true });
 
 document.addEventListener('touchend', e => {
     const endX = e.changedTouches[0].clientX;
     const diff = startX - endX;
 
+    // swipe kiri
     if (diff > 70 && index < pages.length - 1) {
         index++;
         showPage(index);
     }
 });
+
+/* =====================
+   FULLSCREEN (GLOBAL)
+===================== */
+window.goFull = function() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    }
+};
 
 /* =====================
    INIT
